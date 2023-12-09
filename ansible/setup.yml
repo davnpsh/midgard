@@ -1,0 +1,9 @@
+- hosts: main
+
+  vars_files:
+    - vars.yml
+
+  roles:
+
+    - role: security
+      become: yes
