@@ -1,0 +1,17 @@
+- name: Add Docker CE repository
+  ansible.builtin.shell: "sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+
+- name: Install Docker packages
+  ansible.builtin.dnf:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-compose-plugin
+  notify: Start Docker service
+
+- name: Add user to Docker group
+  ansible.builtin.user:
+    name: {{ user }}
+    groups: docker
+    append: yes
