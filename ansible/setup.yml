@@ -7,3 +7,6 @@
 
     - role: security
       become: yes
+
+    - role: docker
+      become: yes
