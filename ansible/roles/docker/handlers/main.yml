@@ -1,5 +1,5 @@
-- name: Start Docker Service
+- name: Start Docker service
   ansible.builtin.systemd:
     name: docker
     enabled: true
-    state: started
+    state: restarted

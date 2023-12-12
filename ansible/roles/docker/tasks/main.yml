@@ -8,10 +8,11 @@
       - docker-ce-cli
       - containerd.io
       - docker-compose-plugin
+    state: latest
   notify: Start Docker service
 
 - name: Add user to Docker group
   ansible.builtin.user:
-    name: {{ user }}
+    name: "{{ user }}"
     groups: docker
     append: yes
