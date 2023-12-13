@@ -16,3 +16,10 @@
     name: "{{ user }}"
     groups: docker
     append: yes
+
+- name: Ensure folder for Docker containers exists
+  ansible.builtin.file:
+    path: "/home/{{ user }}/docker-containers"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
