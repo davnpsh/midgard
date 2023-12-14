@@ -6,17 +6,21 @@
 
   roles:
 
-    - role: security
-      become: yes
+    #- role: security
+    #  become: yes
 
-    - role: docker
-      become: yes
+    #- role: docker
+    #  become: yes
 
     # VPN configuration needed for services
-    # ---
-    - role: vpn
-      become: yes
-    # ---
-
+    # --- Tailscale
+    #- role: vpn
+    #  become: yes
     
-    #- role: services
+    # Run the playbook once, and finish setting up Tailscale
+
+    # After this step, uncomment the services role below
+    # and add the Tailscale IP address to the secrets.yml file
+    # ---
+    
+    - role: services
