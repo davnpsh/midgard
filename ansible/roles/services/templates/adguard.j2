@@ -1,0 +1,22 @@
+# Docker compose file for AdGuard Home
+
+# This only works as plain DNS since I only need to
+# resolve my domain internally
+
+version: '3'
+
+services:
+
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: 'adguardhome'
+    restart: unless-stopped
+    volumes:
+      - ./work:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+
+      # Web UI
+      - "{{ midgard.ip.private }}:4000:3000/tcp"
