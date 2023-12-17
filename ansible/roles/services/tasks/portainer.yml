@@ -1,0 +1,12 @@
+- name: Ensure Portainer folder exists
+  ansible.builtin.file:
+    path: "/home/{{ user }}/docker-containers/portainer"
+    state: directory
+
+- name: Copy Portainer docker compose file
+  ansible.builtin.template:
+    src: portainer.j2
+    dest: "/home/{{ user }}/docker-containers/portainer/docker-compose.yml"
+
+- name: Start Portainer
+  ansible.builtin.shell: "cd /home/{{ user }}/docker-containers/portainer && docker compose down && docker compose up -d"

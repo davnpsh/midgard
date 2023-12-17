@@ -1,0 +1,25 @@
+version: "3.3"
+
+services:
+
+  docker-socket-proxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    container_name: "docker-socket-proxy"
+    environment:
+
+      # For Portainer
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - IMAGES=1
+      - INFO=1
+      - VOLUMES=1
+      - NETWORKS=1
+
+      # Danger zone
+      - POST=0 # Disallow any POST operations (effectively read-only)
+    ports:
+      - "{{ midgard.ip.private }}:2375:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Mounted as read-only
+    restart: unless-stopped

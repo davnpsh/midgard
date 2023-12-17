@@ -15,8 +15,8 @@ services:
       - ./work:/opt/adguardhome/work
       - ./conf:/opt/adguardhome/conf
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "{{ midgard.ip.private }}:53:53/tcp"
+      - "{{ midgard.ip.private }}:53:53/udp"
 
       # Web UI
       - "{{ midgard.ip.private }}:4000:3000/tcp"
