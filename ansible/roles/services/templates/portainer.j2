@@ -8,6 +8,6 @@ services:
     ports:
       - "{{ midgard.ip.private }}:8000:8000"
       - "{{ midgard.ip.private }}:9443:9443"
-    restart: unless-stopped
+    restart: always
     volumes:
       - ./data:/data
