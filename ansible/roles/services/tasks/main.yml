@@ -1,6 +1,6 @@
-#- include_tasks: nginx-proxy-manager.yml
-#- include_tasks: gitea.yml
-#- include_tasks: adguard.yml
-#- include_tasks: portainer.yml
-#- include_tasks: docker-socket-proxy.yml
+- include_tasks: nginx-proxy-manager.yml
+- include_tasks: gitea.yml
+- include_tasks: adguard.yml
+- include_tasks: portainer.yml
+- include_tasks: docker-socket-proxy.yml
 - include_tasks: homepage.yml

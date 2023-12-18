@@ -5,7 +5,7 @@ services:
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: homepage
-    restart: always
+    restart: unless-stopped
     ports:
       - "{{ midgard.ip.private }}:5000:3000"
     volumes:
