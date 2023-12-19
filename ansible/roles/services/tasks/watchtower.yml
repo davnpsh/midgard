@@ -1,0 +1,12 @@
+- name: Ensure Watchtower folder exists
+  ansible.builtin.file:
+    path: "/home/{{ user }}/docker-containers/watchtower"
+    state: directory
+
+- name: Copy Watchtower docker compose file
+  ansible.builtin.template:
+    src: watchtower.j2
+    dest: "/home/{{ user }}/docker-containers/watchtower/docker-compose.yml"
+
+- name: Start Watchtower
+  ansible.builtin.shell: "cd /home/{{ user }}/docker-containers/watchtower && docker compose down && docker compose up -d"
