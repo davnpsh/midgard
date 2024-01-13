@@ -3,7 +3,7 @@
 # This script must be executed manually by the user using SUDO, not root.
 
 # Folder path
-backups_folder="/home/rocky/borg/backups"
+backups_folder=""
 
 # Check if the folder exists
 if [ ! -d "$folder" ]; then
@@ -18,10 +18,10 @@ timestamp=$(date +"%Y%m%d_%H%M%S")
 folder_name="borg-midgard-extracted_($timestamp)"
 
 # Output folder
-output_path="/home/rocky/borg/extracted/$folder_name.tar"
+output_path=""
 
 # User
-user="rocky"
+user=""
 
 # Create a tar archive of the folder
 sudo tar -cf "$output_path" "$backups_folder"
