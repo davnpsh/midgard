@@ -4,4 +4,5 @@
 # - include_tasks: portainer.yml
 # - include_tasks: docker-socket-proxy.yml
 # - include_tasks: homepage.yml
-- include_tasks: watchtower.yml
+# - include_tasks: watchtower.yml
+- include_tasks: sshwifty.yml
