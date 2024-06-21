@@ -1,6 +1,6 @@
 # midgard
 
-> A general setup of my HomeLab
+> A general setup of my personal VPS
 
 This repository serves as setup and documentation of my personal VPS setup.
 
