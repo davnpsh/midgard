@@ -4,11 +4,11 @@
     - secrets.yml
 
   roles:
-    - role: security
-      become: yes
-
-    #- role: docker
+    #- role: security
     #  become: yes
+
+    - role: docker
+      become: yes
 
     # VPN configuracion needed for services
     # Tailscale

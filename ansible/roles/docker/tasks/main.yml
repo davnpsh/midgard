@@ -1,0 +1,41 @@
+- name: Install necessary packages for Docker repository
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: latest
+    update_cache: yes
+
+- name: Copy add-docker-repo.sh
+  ansible.builtin.copy:
+    src: add-docker-repo.sh
+    dest: /tmp/add-docker-repo.sh
+    mode: '755'
+
+- name: Add Docker apt repository
+  ansible.builtin.shell: "cd /tmp && bash add-docker-repo.sh"
+
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+    update_cache: yes
+
+- name: Add user to Docker group
+  ansible.builtin.user:
+    name: "{{ user.name }}"
+    groups: docker
+    append: yes
+
+- name: Ensure folder for Docker volumes data exists
+  ansible.builtin.file:
+    path: "/home/{{ user.name }}/docker"
+    state: directory
+    owner: "{{ user.name }}"
+    group: "{{ user.name }}"
