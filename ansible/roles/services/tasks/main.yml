@@ -1,8 +1,12 @@
-# - include_tasks: nginx-proxy-manager.yml
-# - include_tasks: gitea.yml
-# - include_tasks: adguard.yml
-# - include_tasks: portainer.yml
-# - include_tasks: docker-socket-proxy.yml
-# - include_tasks: homepage.yml
-# - include_tasks: watchtower.yml
-- include_tasks: sshwifty.yml
+- name: Copy general docker compose file
+  ansible.builtin.template:
+    src: compose.j2
+    dest: "/home/{{ user.name }}/docker/compose.yml"
+
+- name: Copy ENV file for docker compose
+  ansible.builtin.copy:
+    src: .env
+    dest: "/home/{{ user.name }}/docker/"
+
+- name: Start Docker services
+  ansible.builtin.shell: "cd /home/{{ user.name }}/docker && docker compose up -d"

@@ -1,0 +1,148 @@
+services:
+
+  # --- VPN
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale
+    hostname: "{{ server.hostname }}"
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/tailscale/state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    network_mode: host
+    cap_add:
+      - net_admin
+      - net_raw
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTHKEY}
+      - TS_USERSPACE=false
+      - TS_STATE_DIR=/var/lib/tailscale
+    healthcheck:
+      # Check if Tailscale network interface is loaded
+      test: ["CMD-SHELL", " ip a | grep -q tailscale"]
+
+  # --- WATCHDOG
+  docker-socket-proxy:
+    container_name: "docker-socket-proxy"
+    image: ghcr.io/tecnativa/docker-socket-proxy:latest
+    restart: unless-stopped
+    environment:
+      # For Portainer
+      - CONTAINERS=1
+      - SERVICES=1
+      - TASKS=1
+      - IMAGES=1
+      - INFO=1
+      - VOLUMES=1
+      - NETWORKS=1
+      # Danger zone
+      - POST=0 # Disallow any POST operations (effectively read-only)
+    ports:
+      - "{{ server.ip.private }}:2375:2375"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro # Mounted as read-only
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "{{ server.ip.private }}:8000:8000"
+      - "{{ server.ip.private }}:9443:9443"
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/portainer/data:/data
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  # --- INTERNAL DNS
+  adguardhome:
+    image: adguard/adguardhome
+    container_name: 'adguardhome'
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/adguard/work:/opt/adguardhome/work
+      - ${PWD}/adguard/conf:/opt/adguardhome/conf
+    ports:
+      - "{{ server.ip.private }}:53:53/tcp"
+      - "{{ server.ip.private }}:53:53/udp"
+
+      # Web UI
+      - "{{ server.ip.private }}:4000:3000/tcp"
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  # --- PRODUCTION
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: 'nginx-proxy-manager'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+
+      # Web UI
+      - '{{ server.ip.private }}:81:81'
+
+    volumes:
+      - ${PWD}/nginx/data:/data
+      - ${PWD}/nginx/letsencrypt:/etc/letsencrypt
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - "{{ server.ip.private }}:5000:3000"
+    volumes:
+      - ${PWD}/homepage/config:/app/config
+    environment:
+      PUID: "{{ user.PUID }}"
+      PGID: "{{ user.PGID }}"
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  sshwifty:
+    image: niruix/sshwifty:latest
+    container_name: sshwifty
+    restart: unless-stopped
+    ports:
+      - "{{ server.ip.private }}:8182:8182/tcp"
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
+  gitea:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID={{ user.PUID }}
+      - USER_GID={{ user.PGID }}
+    restart: unless-stopped
+    volumes:
+      - ${PWD}/gitea/data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      # Web UI
+      - "{{ server.ip.private }}:3000:3000"
+      # Exclusive SSH for gitea
+      - "{{ server.ip.private }}:2222:22"
+    depends_on:
+      tailscale:
+        condition: service_healthy
