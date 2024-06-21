@@ -27,4 +27,3 @@ Then, check `setup.yml`, uncomment roles and run as many times as indicated in t
 <hr>
 
 ![](imgs/debian.gif)
-![](imgs/jellyfin.gif)
