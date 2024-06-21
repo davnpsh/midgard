@@ -1,0 +1,12 @@
+- name: Copy Tailscale Docker compose file
+  ansible.builtin.template:
+    src: compose.j2
+    dest: "/home/{{ user.name }}/docker/compose.yml"
+
+- name: Copy ENV file for docker compose
+  ansible.builtin.copy:
+    src: .env
+    dest: "/home/{{ user.name }}/docker/"
+
+- name: Start VPN service
+  ansible.builtin.shell: "cd /home/{{ user.name }}/docker && docker compose up -d"
