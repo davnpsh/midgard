@@ -7,12 +7,12 @@
     - role: security
       become: yes
 
-    - role: docker
-      become: yes
+    #- role: docker
+    #  become: yes
 
     # VPN configuracion needed for services
     # Tailscale
-    - role: vpn
+    #- role: vpn
 
     # Run the playbook once, and assign the private IP address in the secrets file.
     # After that, comment the roles above and uncomment the roles below.
