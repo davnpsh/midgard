@@ -65,6 +65,22 @@ services:
       tailscale:
         condition: service_healthy
 
+  glances:
+    image: nicolargo/glances:latest
+    restart: unless-stopped
+    container_name: glances
+    pid: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/os-release:/etc/os-release:ro
+    ports:
+      - "{{ server.ip.private }}:61208:61208"
+    environment:
+      - "GLANCES_OPT=-w"
+    depends_on:
+      tailscale:
+        condition: service_healthy
+
   # --- INTERNAL DNS
   adguardhome:
     image: adguard/adguardhome
