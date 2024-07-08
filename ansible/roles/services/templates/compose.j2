@@ -1,10 +1,12 @@
 services:
 
-  # --- ROUTER TO TAILSCALE
-  tailscale:
+  # --- TAILSCALE PROXY
+  # Dashboard port: 81
+  # Exposes ports: 80, 81, 443
+  nginx-ts:
     image: tailscale/tailscale:latest
-    container_name: tailscale-router
-    hostname: "{{ server.hostname }}"
+    container_name: nginx-ts
+    hostname: "{{ server.hostname }}-docker-proxy"
     restart: unless-stopped
     volumes:
       - ${PWD}/tailscale/state:/var/lib/tailscale
@@ -23,12 +25,11 @@ services:
       test: ["CMD-SHELL", " ip a | grep -q tailscale"]
 
   # --- PROXY
-  # Dashboard port: 81
-  nginx-proxy-manager:
+  nginx:
     image: 'jc21/nginx-proxy-manager:latest'
-    container_name: 'nginx-proxy-manager'
+    container_name: nginx
     restart: unless-stopped
-    network_mode: service:tailscale
+    network_mode: service:nginx-ts
     volumes:
       - ${PWD}/nginx/data:/data
       - ${PWD}/nginx/letsencrypt:/etc/letsencrypt
@@ -37,70 +38,16 @@ services:
       interval: 10s
       timeout: 3s
     depends_on:
-      tailscale:
+      nginx-ts:
         condition: service_healthy
 
   # --- WATCHDOG
-  # Exposes ports: 2375
-  docker-socket-proxy:
-    container_name: "docker-socket-proxy"
-    image: ghcr.io/tecnativa/docker-socket-proxy:latest
-    restart: unless-stopped
-    environment:
-      # For Portainer
-      - CONTAINERS=1
-      - SERVICES=1
-      - TASKS=1
-      - IMAGES=1
-      - INFO=1
-      - VOLUMES=1
-      - NETWORKS=1
-      # Danger zone
-      - POST=0 # Disallow any POST operations (effectively read-only)
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro # Mounted as read-only
-    networks:
-      - proxy
-    depends_on:
-      nginx-proxy-manager:
-        condition: service_healthy
-
   watchtower:
     container_name: watchtower
     image: containrrr/watchtower
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
-  # Exposes ports: 8000, 9443
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: unless-stopped
-    volumes:
-      - ${PWD}/portainer/data:/data
-    networks:
-      - proxy
-    depends_on:
-      nginx-proxy-manager:
-        condition: service_healthy
-
-  # Exposes ports: 61208
-  glances:
-    image: nicolargo/glances:latest
-    restart: unless-stopped
-    container_name: glances
-    pid: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - /etc/os-release:/etc/os-release:ro
-    environment:
-      - "GLANCES_OPT=-w"
-    networks:
-      - proxy
-    depends_on:
-      nginx-proxy-manager:
-        condition: service_healthy
 
   # --- INTERNAL DNS
   # Exposes ports: 53/tcp, 53/udp, 3000
@@ -114,7 +61,7 @@ services:
     networks:
       - proxy
     depends_on:
-      nginx-proxy-manager:
+      nginx:
         condition: service_healthy
 
   # Exposes ports: 3000
@@ -130,7 +77,7 @@ services:
     networks:
       - proxy
     depends_on:
-      nginx-proxy-manager:
+      nginx:
         condition: service_healthy
 
   # Exposes ports: 8182
@@ -141,7 +88,7 @@ services:
     networks:
       - proxy
     depends_on:
-      nginx-proxy-manager:
+      nginx:
         condition: service_healthy
 
   # Exposes ports: 3000, 22
@@ -159,7 +106,7 @@ services:
     networks:
       - proxy
     depends_on:
-      nginx-proxy-manager:
+      nginx:
         condition: service_healthy
 
 networks:
